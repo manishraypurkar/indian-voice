@@ -16,11 +16,21 @@ import android.widget.ImageButton;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.google.cloud.translate.Language;
+import com.google.cloud.translate.Translate;
+import com.google.cloud.translate.TranslateOptions;
+import com.google.cloud.translate.Translation;
+
 public class MainActivity extends Activity {
 
     private TextView txtSpeechInput;
+    private TextView txtSpeechOutput;
     private ImageButton btnSpeak;
     private final int REQ_CODE_SPEECH_INPUT = 100;
+    private String input = "";
+    private String sourceLang;
+    private String targetLang;
+    private String translatedText;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -28,10 +38,11 @@ public class MainActivity extends Activity {
         setContentView(R.layout.activity_main);
 
         txtSpeechInput = (TextView) findViewById(R.id.txtSpeechInput);
+        txtSpeechOutput = (TextView)findViewById(R.id.txtSpeechOutput);
         btnSpeak = (ImageButton) findViewById(R.id.btnSpeak);
 
-        // hide the action bar
-//rip        getActionBar().hide();
+
+         // hack@yashdesai.me
 
         btnSpeak.setOnClickListener(new View.OnClickListener() {
 
@@ -76,6 +87,20 @@ public class MainActivity extends Activity {
                     ArrayList<String> result = data
                             .getStringArrayListExtra(RecognizerIntent.EXTRA_RESULTS);
                     txtSpeechInput.setText(result.get(0));
+                    input = result.get(0);
+                    sourceLang = "en";
+                    targetLang = "hi";
+
+                    translate.translateTextWithOptions(input, sourceLang, targetLang, translatedText);
+                    txtSpeechOutput.setText(translatedText);
+
+/*
+                    // continue translating here
+                    Translate translate = createTranslateService();
+                    Translation translation = translate.translate(input);
+                    txtSpeechOutput.setText(translation.getTranslatedText());
+*/
+
                 }
                 break;
             }
@@ -84,7 +109,38 @@ public class MainActivity extends Activity {
     }
 
 
+    public static Translate createTranslateService() {
+        return TranslateOptions.newBuilder().build().getService();
+    }
 
+
+
+    public static void main(String[] args) {
+        String command = args[0];
+        String text;
+
+        if (command.equals("detect")) {
+            text = args[1];
+            translate.detectLanguage(text, System.out);
+        } else if (command.equals("translate")) {
+            text = args[1];
+            try {
+                String sourceLang = args[2];
+                String targetLang = args[3];
+                translate.translateTextWithOptions(text, sourceLang, targetLang, translatedText);
+            } catch (ArrayIndexOutOfBoundsException ex) {
+                translate.translateText(text, System.out);
+            }
+        } else if (command.equals("langsupport")) {
+            try {
+                String target = args[1];
+                //TranslateText.displaySupportedLanguages(System.out, Optional.of(target));
+                // TranslateText.displaySupportedLanguages(System.out, Optional.of(target));
+            } catch (ArrayIndexOutOfBoundsException ex) {
+                // TranslateText.displaySupportedLanguages(System.out, Optional.empty());
+            }
+        }
+    }
 
 
 }
