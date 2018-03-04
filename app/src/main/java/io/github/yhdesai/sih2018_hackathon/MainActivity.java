@@ -88,13 +88,17 @@ public class MainActivity extends Activity {
                             .getStringArrayListExtra(RecognizerIntent.EXTRA_RESULTS);
                     txtSpeechInput.setText(result.get(0));
                     input = result.get(0);
+                    //Here, input string contains the text of what the user spoke
+                   /*
                     sourceLang = "en";
                     targetLang = "hi";
 
                     translate.translateTextWithOptions(input, sourceLang, targetLang, translatedText);
                     txtSpeechOutput.setText(translatedText);
 
-/*
+                  //  executeNLP(translatedText);
+                  //  String action = result.getString
+
                     // continue translating here
                     Translate translate = createTranslateService();
                     Translation translation = translate.translate(input);
@@ -114,7 +118,7 @@ public class MainActivity extends Activity {
     }
 
 
-
+/*
     public static void main(String[] args) {
         String command = args[0];
         String text;
@@ -142,5 +146,5 @@ public class MainActivity extends Activity {
         }
     }
 
-
+*/
 }
