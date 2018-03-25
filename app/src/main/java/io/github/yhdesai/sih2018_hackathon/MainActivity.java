@@ -1,35 +1,35 @@
 package io.github.yhdesai.sih2018_hackathon;
 
-import android.support.v7.app.AppCompatActivity;
-import android.os.Bundle;
-
-import java.io.PrintStream;
-import java.util.ArrayList;
-import java.util.Locale;
-
 import android.app.Activity;
 import android.content.ActivityNotFoundException;
 import android.content.Intent;
 import android.os.Bundle;
 import android.speech.RecognizerIntent;
-import android.view.Menu;
+import android.util.Log;
 import android.view.View;
 import android.widget.ImageButton;
 import android.widget.TextView;
 import android.widget.Toast;
 
-import com.google.cloud.translate.Language;
 import com.google.cloud.translate.Translate;
 import com.google.cloud.translate.TranslateOptions;
 import com.google.cloud.translate.Translation;
+import com.sun.xml.internal.ws.api.message.Packet;
 
+import java.util.ArrayList;
+
+import javax.xml.transform.Result;
+
+import static android.content.ContentValues.TAG;
 import static java.lang.System.out;
 
 public class MainActivity extends Activity {
 
+
     private TextView txtSpeechInput;
     private TextView txtSpeechOutput;
     private ImageButton btnSpeak;
+
     private final int REQ_CODE_SPEECH_INPUT = 100;
     private String input = "";
     private String sourceLang;
@@ -121,6 +121,73 @@ public class MainActivity extends Activity {
                     out.printf("TranslatedText:\n\tLang: %s, Text: %s\n", targetLang,
                             translation.getTranslatedText());
                     txtSpeechOutput.setText( translation.getTranslatedText());
+
+                    final AIConfiguration config = new AIConfiguration(ACCESS_TOKEN,
+                            AIConfiguration.SupportedLanguages.English,
+                            AIConfiguration.RecognitionEngine.System);
+
+                    final AIDataService aiDataService = new AIDataService(config);
+
+                    final AIRequest aiRequest = new AIRequest();
+                    aiRequest.setQuery("Hello");
+
+
+                    // part 2
+
+                    new AsyncTask<AIRequest, Void, AIResponse>() {
+                        @Override
+                        protected AIResponse doInBackground(AIRequest... requests) {
+                            final AIRequest request = requests[0];
+                            try {
+                                final AIResponse response = aiDataService.request(aiRequest);
+                                return response;
+                            } catch (AIServiceException e) {
+                            }
+                            return null;
+                        }
+                        @Override
+                        protected void onPostExecute(AIResponse aiResponse) {
+                            if (aiResponse != null) {
+                                // process aiResponse here
+                            }
+                        }
+                    }.execute(aiRequest);
+
+
+                    //part 3
+                    public void onResult(final AIResponse response) {
+                        final Packet.Status status = response.getStatus();
+                        Log.i(TAG, "Status code: " + status.getCode());
+                        Log.i(TAG, "Status type: " + status.getErrorType());
+
+                        final Result result = response.getResult();
+                        Log.i(TAG, "Resolved query: " + result.getResolvedQuery());
+
+                        final Result result = response.getResult();
+                        Log.i(TAG, "Action: " + result.getAction());
+
+                        final Result result = response.getResult();
+                        final String speech = result.getFulfillment().getSpeech();
+                        Log.i(TAG, "Speech: " + speech);
+
+
+                        final Result result = response.getResult();
+                        final Metadata metadata = result.getMetadata();
+                        if (metadata != null) {
+                            Log.i(TAG, "Intent id: " + metadata.getIntentId());
+                            Log.i(TAG, "Intent name: " + metadata.getIntentName());
+                        }
+
+
+                        final Result result = response.getResult();
+                        final HashMap<String, JsonElement> params = result.getParameters();
+                        if (params != null && !params.isEmpty()) {
+                            Log.i(TAG, "Parameters: ");
+                            for (final Map.Entry<String, JsonElement> entry : params.entrySet()) {
+                                Log.i(TAG, String.format("%s: %s", entry.getKey(), entry.getValue().toString()));
+                            }
+                        }
+                    }
 
 
 
