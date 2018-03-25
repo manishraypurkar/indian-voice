@@ -2,6 +2,8 @@ package io.github.yhdesai.sih2018_hackathon;
 
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
+
+import java.io.PrintStream;
 import java.util.ArrayList;
 import java.util.Locale;
 
@@ -31,6 +33,7 @@ public class MainActivity extends Activity {
     private String sourceLang;
     private String targetLang;
     private String translatedText;
+    private Translate translate;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -61,7 +64,8 @@ public class MainActivity extends Activity {
         Intent intent = new Intent(RecognizerIntent.ACTION_RECOGNIZE_SPEECH);
         intent.putExtra(RecognizerIntent.EXTRA_LANGUAGE_MODEL,
                 RecognizerIntent.LANGUAGE_MODEL_FREE_FORM);
-        intent.putExtra(RecognizerIntent.EXTRA_LANGUAGE, Locale.getDefault());
+
+        intent.putExtra(RecognizerIntent.EXTRA_LANGUAGE, "hi");
         intent.putExtra(RecognizerIntent.EXTRA_PROMPT,
                 getString(R.string.speech_prompt));
         try {
@@ -89,7 +93,7 @@ public class MainActivity extends Activity {
                     txtSpeechInput.setText(result.get(0));
                     input = result.get(0);
                     //Here, input string contains the text of what the user spoke
-                   /*
+
                     sourceLang = "en";
                     targetLang = "hi";
 
@@ -103,7 +107,7 @@ public class MainActivity extends Activity {
                     Translate translate = createTranslateService();
                     Translation translation = translate.translate(input);
                     txtSpeechOutput.setText(translation.getTranslatedText());
-*/
+
 
                 }
                 break;
@@ -112,7 +116,24 @@ public class MainActivity extends Activity {
         }
     }
 
+    public static void translateTextWithOptions(
+            String sourceText,
+            String sourceLang,
+            String targetLang,
+            PrintStream out) {
 
+        Translate translate = createTranslateService();
+        Translate.TranslateOption srcLang = Translate.TranslateOption.sourceLanguage(sourceLang);
+        Translate.TranslateOption tgtLang = Translate.TranslateOption.targetLanguage(targetLang);
+
+        // Use translate `model` parameter with `base` and `nmt` options.
+        Translate.TranslateOption model = Translate.TranslateOption.model("nmt");
+
+        Translation translation = translate.translate(sourceText, srcLang, tgtLang, model);
+        out.printf("Source Text:\n\tLang: %s, Text: %s\n", sourceLang, sourceText);
+        out.printf("TranslatedText:\n\tLang: %s, Text: %s\n", targetLang,
+                translation.getTranslatedText());
+    }
     public static Translate createTranslateService() {
         return TranslateOptions.newBuilder().build().getService();
     }
